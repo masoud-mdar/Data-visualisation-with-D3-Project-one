@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const req = new XMLHttpRequest
+                req.open("GET", "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json", true)
+                req.send()
+                req.onload = () => {
+                    const dataset = JSON.parse(req.responseText)
+                    console.log(dataset)
+
+                    const w = 800
+                    const h = 600
+                    const padding = 50
+
+                    const xScale = d3.scaleLinear()
+                    .domain([d3.min(dataset, d => d.Year), d3.max(dataset, d => d.Year)])
+                    .range([padding, w - padding])
+
+                    const yScale = d3.scaleLinear()
+                    .domain([d3.min(dataset, d => d.Seconds), d3.max(dataset, d => d.Seconds)])
+                    .range([padding,h - padding])
+
+                    const div = d3.select("body").append("div")
+                    const svg = div.append("svg").attr("width", w).attr("height", h)
+                    const circle = svg.selectAll("circle").data(dataset).enter().append("circle")
+                    .attr("cx", (d,i) => xScale(d.Year))
+                    .attr("cy", (d,i) => yScale(d.Seconds))
+                    .attr("data-xvalue", (d,i) => xScale(d.Year))
+                    .attr("data-yvalue", (d,i) => yScale(d.Seconds))
+                    .attr("r",5)
+                    .attr("class","dot")
+                    .attr("fill", (d,i) => {
+                        if (d.Doping){
+                            return "blue"
+                        } else{
+                            return "brown"
+                        }
+                    })
+                    .append("title")
+                    .text(d => d.Year)
+
+
+                    // X Axis
+
+                    const years = dataset.map(i => new Date(i.Year.toString()))
+                    console.log(years)
+                    const minYear = new Date(d3.min(years))
+                    //minYear.setFullYear(minYear.getFullYear() - 3)
+
+                    const xAxisScale = d3.scaleTime()
+                    .domain([minYear, d3.max(years)])
+                    .range([padding, w - padding])
+                    
+
+                    const xAxis = d3.axisBottom(xAxisScale)
+                    .ticks(9)
+
+                    svg.append("g").attr("id", "x-axis")
+                    .attr("transform", "translate(0," + (h-padding) + ")")
+                    .call(xAxis)
+
+                    // Y Axis
+                    const time = dataset.map(i => new Date(i.Seconds * 1000).toISOString().substr(14, 5))
+                    console.log(d3.max(time))
+                    const maxTime = new Date(d3.max(time))
+                    console.log(maxTime)
+
+                    const yAxisScale = d3.scaleTime()
+                    .domain([d3.min(dataset, d => d.Time), d3.max(dataset, d => d.Time)])
+                    .range([padding, h-padding])
+
+                    const yAxis = d3.axisLeft(yAxisScale)
+                    svg.append("g").attr("id", "y-axis")
+                    .attr("transform", "translate(" + padding + ",0)")
+                    .call(yAxis)
+
+
+
+
+
+                }
+            })
+        </script>
+        <h1 id="title">Doping in Professional Bicycle Racing</h1>
+    </body>
+</html>
