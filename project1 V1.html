@@ -1,0 +1,85 @@
+<!--Passed All the tests except tooltip tests-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body{
+                text-align: center;
+            }
+            div{
+                position: absolute;
+                margin:25px;
+                left:25%;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const req = new XMLHttpRequest
+                req.open("GET","https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json",true)
+                req.send()
+                req.onload = () => {
+                    const json = JSON.parse(req.responseText)
+                    const dataset = json.data
+                    console.log(dataset)
+
+                    const h = 900
+                    const w = 600
+                    const padding = 40
+
+                    const div = d3.select("body").append("div")
+                    const svg = div.append("svg").attr("height", h).attr("width", w)
+                    const rect = svg.selectAll("rect").data(dataset).enter().append("rect")
+                    rect.attr("width",1)
+                    .attr("height", d => (d[1]/25))
+                    .attr("x", (d,i) => i*2 + padding + "px")
+                    .attr("y", d => (h- padding) - (d[1]/25))
+                    .attr("fill", "brown")
+                    .attr("class", "bar")
+                    .attr("data-date", (d,i) => d[0])
+                    .attr("data-gdp", (d,i) => d[1])
+                    .append("title")
+                    .attr("id","tooltip")
+                    .attr("data-date", (d,i) => d[0])
+                    .append("text")
+                    .text(d => d[0] + ", " + d[1])
+                    
+
+
+                    const years = dataset.map(i => new Date(i[0]))
+
+                    const maxYear = new Date(d3.max(years));
+                    console.log(years)
+
+                    const xScale = d3.scaleTime()
+                    .domain([d3.min(years), maxYear])
+                    .range([0, dataset.length*2]);
+
+                    const xAxis = d3.axisBottom(xScale)
+                    svg.append("g").attr("id","x-axis").attr("transform", "translate(40," + (h-padding) + ")")
+                    .call(xAxis)
+
+                    const yScale = d3.scaleLinear()
+                    .domain([(0),d3.max(dataset, d => d[1])])
+                    .range([(h-padding),((h- padding) - 722.5880000000001)])
+
+                    const yAxis = d3.axisLeft(yScale)
+                    svg.append("g").attr("id","y-axis").attr("transform", "translate(" + padding + ",0)")
+                    .call(yAxis)
+
+                    svg.append("text")
+                    .attr("text-anchor", "end")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", padding*2)
+                    .attr("x",-padding*5)
+                    .text("Gross Domestic Product")
+                    
+
+                }
+            })
+        </script>
+        <h1 id="title">United States GDP</h1>
+    </body>
+</html>
