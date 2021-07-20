@@ -17,10 +17,12 @@
         <script src="https://d3js.org/d3.v5.min.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", () => {
+                
                 const req = new XMLHttpRequest
                 req.open("GET","https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json",true)
                 req.send()
                 req.onload = () => {
+                    
                     const json = JSON.parse(req.responseText)
                     const dataset = json.data
                     console.log(dataset)
@@ -31,6 +33,7 @@
 
                     const div = d3.select("body").append("div")
                     const svg = div.append("svg").attr("height", h).attr("width", w)
+                    
                     const rect = svg.selectAll("rect").data(dataset).enter().append("rect")
                     rect.attr("width",1)
                     .attr("height", d => (d[1]/25))
@@ -46,7 +49,6 @@
                     .append("text")
                     .text(d => d[0] + ", " + d[1])
                     
-
 
                     const years = dataset.map(i => new Date(i[0]))
 
@@ -76,7 +78,6 @@
                     .attr("x",-padding*5)
                     .text("Gross Domestic Product")
                     
-
                 }
             })
         </script>
